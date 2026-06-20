@@ -4,14 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Plataforma Banco de Sangre</title>
-  <!-- TailwindCSS -->
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen flex items-center justify-center p-4">
 
   <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-6 border-t-8 border-red-700">
     
-    <!-- Encabezado -->
     <div class="text-center">
       <h1 class="text-2xl font-bold text-gray-800 flex justify-center items-center gap-2">
         ❤️ Banco de Sangre
@@ -19,7 +17,6 @@
       <p class="text-gray-500 text-sm mt-1">Conectando héroes con vidas que salvar</p>
     </div>
 
-    <!-- Pestañas de Navegación -->
     <div class="flex border-b border-gray-200">
       <button id="tabDonar" onclick="cambiarPestaña('donar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none transition duration-150 cursor-pointer">
         Quiero Donar
@@ -29,7 +26,7 @@
       </button>
     </div>
 
-    <!-- SECCIÓN 1: FORMULARIO PARA REGISTRO DE DONADORES -->
+    <!-- FORMULARIO DONADORES -->
     <form id="formDonador" onsubmit="enviarDatosDonador(event)" class="space-y-4">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
@@ -52,13 +49,13 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono (WhatsApp)</label>
-          <input type="tel" id="telefono" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: 2293254386">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono (10 dígitos)</label>
+          <input type="text" id="telefono" required maxlength="10" pattern="\d{10}" title="Introduce exactamente 10 números" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: 2293254386">
         </div>
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad o Zona</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad o Zona donde resides</label>
         <input type="text" id="ciudad" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Veracruz Centro">
       </div>
 
@@ -72,8 +69,7 @@
       </button>
     </form>
 
-
-    <!-- SECCIÓN 2: FORMULARIO PARA SOLICITAR DONADORES (Oculto al inicio) -->
+    <!-- FORMULARIO SOLICITUDES -->
     <form id="formSolicitante" onsubmit="enviarDatosSolicitud(event)" class="space-y-4 hidden">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Familiar o Paciente</label>
@@ -97,18 +93,27 @@
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono de Contacto</label>
-          <input type="tel" id="telefonoContacto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+          <input type="text" id="telefonoContacto" required maxlength="10" pattern="\d{10}" title="Introduce exactamente 10 números" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: 2293254386">
         </div>
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Hospital / Ubicación</label>
-        <input type="text" id="hospital" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Hospital General IMSS N° 71">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad de la Urgencia</label>
+        <select id="ciudadUrgencia" onchange="filtrarHospitalesPorCiudad()" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+          <option value="">Cargando ciudades...</option>
+        </select>
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Detalles Adicionales (Cantidad, motivos)</label>
-        <textarea id="detalles" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Se requieren 4 donadores urgentes de plaquetas..."></textarea>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Hospital de la Urgencia</label>
+        <select id="hospital" required disabled class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 cursor-not-allowed">
+          <option value="">Primero selecciona una ciudad</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Detalles Adicionales</label>
+        <textarea id="detalles" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Se necesitan 4 donadores..."></textarea>
       </div>
 
       <button type="submit" id="btnEnviarSolicitud" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-lg transition duration-200 cursor-pointer text-center shadow-md">
@@ -116,16 +121,66 @@
       </button>
     </form>
 
-    <!-- Mensajes de Estado Único Dinámico -->
     <div id="mensajeEstado" class="hidden p-3 rounded-lg text-sm font-medium"></div>
 
   </div>
 
   <script>
-    // URL vinculada a tu Google Apps Script de forma directa
-    const URL_API = "https://script.google.com/macros/s/AKfycbxHfQByk0PfcaYjFsf5s7jjF6y1k2bHaBYasuGnKakcc7ChyM74rx3UXWnsIq8OgQ8e/exec";
+    const URL_API = "https://script.google.com/macros/s/AKfycbyYhpRtGC6tmijWhh0xnjVSRTrz_UbCwuIJ-cHdowmC2f5OIZubhmmiXMIz3457ae2m/exec";
+    let baseDatosUbicaciones = {};
 
-    // Intercambiar visibilidad entre los formularios
+    document.addEventListener("DOMContentLoaded", () => {
+      const hoy = new Date().toISOString().split("T")[0];
+      document.getElementById("ultimaDonacion").setAttribute("max", hoy);
+      descargarMapaHospitales();
+    });
+
+    function descargarMapaHospitales() {
+      const selectCiudad = document.getElementById("ciudadUrgencia");
+      fetch(URL_API)
+        .then(res => res.json())
+        .then(data => {
+          if (data.exito && data.mapa) {
+            baseDatosUbicaciones = data.mapa;
+            selectCiudad.innerHTML = '<option value="">Selecciona la Ciudad</option>';
+            Object.keys(baseDatosUbicaciones).forEach(ciudad => {
+              const opt = document.createElement("option");
+              opt.value = ciudad;
+              opt.textContent = ciudad;
+              selectCiudad.appendChild(opt);
+            });
+          } else {
+            selectCiudad.innerHTML = '<option value="">Error al indexar ubicaciones</option>';
+          }
+        })
+        .catch(() => {
+          selectCiudad.innerHTML = '<option value="">Error al conectar con la base de datos</option>';
+        });
+    }
+
+    function filtrarHospitalesPorCiudad() {
+      const ciudadSeleccionada = document.getElementById("ciudadUrgencia").value;
+      const selectHospital = document.getElementById("hospital");
+      
+      selectHospital.innerHTML = '<option value="">Selecciona el Hospital</option>';
+      
+      if (ciudadSeleccionada && baseDatosUbicaciones[ciudadSeleccionada]) {
+        selectHospital.disabled = false;
+        selectHospital.className = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white cursor-pointer";
+        
+        baseDatosUbicaciones[ciudadSeleccionada].forEach(hosp => {
+          const opt = document.createElement("option");
+          opt.value = hosp;
+          opt.textContent = hosp;
+          selectHospital.appendChild(opt);
+        });
+      } else {
+        selectHospital.disabled = true;
+        selectHospital.className = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 cursor-not-allowed";
+        selectHospital.innerHTML = '<option value="">Primero selecciona una ciudad</option>';
+      }
+    }
+
     function cambiarPestaña(pestaña) {
       const formDonador = document.getElementById('formDonador');
       const formSolicitante = document.getElementById('formSolicitante');
@@ -146,7 +201,6 @@
       }
     }
 
-    // Procesar envío del Formulario de Donadores
     function enviarDatosDonador(e) {
       e.preventDefault();
       const btn = document.getElementById('btnEnviarDonador');
@@ -161,7 +215,6 @@
       procesarEnvio(btn, datos, 'formDonador');
     }
 
-    // Procesar envío del Formulario de Solicitudes Urgentes
     function enviarDatosSolicitud(e) {
       e.preventDefault();
       const btn = document.getElementById('btnEnviarSolicitud');
@@ -169,14 +222,14 @@
         tipoAccion: "solicitar",
         nombreContacto: document.getElementById('nombreContacto').value,
         tipoSangreRequerido: document.getElementById('tipoSangreRequerido').value,
-        telefonoContacto: document.getElementById('telefonoContacto').value,
         hospital: document.getElementById('hospital').value,
+        ciudad: document.getElementById('ciudadUrgencia').value,
+        telefonoContacto: document.getElementById('telefonoContacto').value,
         detalles: document.getElementById('detalles').value
       };
       procesarEnvio(btn, datos, 'formSolicitante');
     }
 
-    // Pipeline unificado para enviar peticiones POST y procesar respuestas JSON
     function procesarEnvio(btn, datos, idFormulario) {
       const mensajeDiv = document.getElementById('mensajeEstado');
       const textoOriginal = btn.innerText;
@@ -194,10 +247,13 @@
       .then(respuesta => {
         btn.disabled = false;
         btn.innerText = textoOriginal;
-        mensajeDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
         
         if (respuesta.exito) {
           document.getElementById(idFormulario).reset();
+          if(idFormulario === 'formSolicitante') {
+             document.getElementById("hospital").disabled = true;
+             document.getElementById("hospital").className = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 cursor-not-allowed";
+          }
           
           if (respuesta.tipo === "donar") {
             mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-green-100 text-green-700 shadow-sm";
@@ -209,36 +265,37 @@
             let htmlResultado = `<p class="font-bold text-base text-blue-950">🚨 ¡Solicitud publicada con éxito!</p>`;
             
             if (respuesta.donadores && respuesta.donadores.length > 0) {
-              htmlResultado += `<p class="text-xs text-gray-700">Hemos localizado <strong>${respuesta.donadores.length} donador(es)</strong> tipo <strong>${respuesta.sangre}</strong> en la base de datos. Presiona un botón para abrir su chat de WhatsApp de inmediato:</p><div class="space-y-2 mt-2">`;
+              htmlResultado += `<p class="text-xs text-gray-700">Hemos localizado <strong>${respuesta.donadores.length} donador(es)</strong> compatibles. Los ubicados en <strong>${datos.ciudad}</strong> aparecen primero para acelerar el contacto:</p><div class="space-y-2 mt-2">`;
               
               respuesta.donadores.forEach(donador => {
-                let textoMensaje = encodeURIComponent(`Hola ${donador.nombre}, disculpa la molestia. Vi en la plataforma que eres donador voluntario tipo ${respuesta.sangre}. Tenemos una situación médica urgente en el ${respuesta.hospital}. ¿Habría alguna posibilidad de que nos apoyes? Muchas gracias.`);
+                let textoMensaje = encodeURIComponent(`Hola ${donador.nombre}, disculpa la molestia. Vi en la plataforma que eres donador voluntario tipo ${respuesta.sangre}. Tenemos una situación médica urgente en el hospital ${respuesta.hospital} de ${datos.ciudad}. ¿Habría alguna posibilidad de que nos apoyes? Muchas gracias.`);
                 let linkWhatsapp = `https://wa.me/${donador.telefono}?text=${textoMensaje}`;
                 
                 htmlResultado += `
                   <a href="${linkWhatsapp}" target="_blank" class="flex items-center justify-between bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition duration-150 shadow-md decoration-none">
-                    <span>🟢 Contactar a ${donador.nombre}</span>
+                    <span>🟢 Contactar a ${donador.nombre} (${donador.ciudad})</span>
                     <span class="bg-green-800 text-white text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap">Enviar mensaje</span>
                   </a>`;
               });
               htmlResultado += `</div>`;
             } else {
-              htmlResultado += `<p class="text-xs text-gray-600">Por el momento no contamos con donadores registrados que coincidan con el tipo de sangre <strong>${respuesta.sangre}</strong> en el sistema, pero la alerta ha sido almacenada para seguimiento.</p>`;
+              htmlResultado += `<p class="text-xs text-gray-600">Por el momento no contamos con donadores registrados tipo <strong>${respuesta.sangre}</strong> en el sistema, pero la alerta ha sido almacenada.</p>`;
             }
-            
             mensajeDiv.innerHTML = htmlResultado;
           }
+          mensajeDiv.classList.remove('hidden');
         } else {
           mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-red-100 text-red-700";
-          mensajeDiv.innerText = "Error del servidor: " + respuesta.mensaje;
+          mensajeDiv.innerText = "Error: " + respuesta.mensaje;
+          mensajeDiv.classList.remove('hidden');
         }
       })
-      .catch(err => {
+      .catch(() => {
         btn.disabled = false;
         btn.innerText = textoOriginal;
-        mensajeDiv.classList.remove('hidden');
         mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-red-100 text-red-700";
-        mensajeDiv.innerText = "Error de conexión. Verifica la conexión a internet o la configuración del script.";
+        mensajeDiv.innerText = "Error de conexión. Verifica la configuración o la red.";
+        mensajeDiv.classList.remove('hidden');
       });
     }
   </script>
