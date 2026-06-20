@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Donadores</title>
+  <title>Plataforma Banco de Sangre</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen flex items-center justify-center p-4">
@@ -14,11 +14,19 @@
       <h1 class="text-2xl font-bold text-gray-800 flex justify-center items-center gap-2">
         ❤️ Banco de Sangre
       </h1>
-      <p class="text-gray-500 text-sm mt-1">Registra tus datos para salvar vidas</p>
+      <p class="text-gray-500 text-sm mt-1">Conectando héroes con vidas que salvar</p>
     </div>
 
-    <form id="formDonador" onsubmit="enviarDatos(event)" class="space-y-4">
-      
+    <div class="flex border-b border-gray-200">
+      <button id="tabDonar" onclick="cambiarPestaña('donar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none transition duration-150">
+        Quiero Donar
+      </button>
+      <button id="tabSolicitar" onclick="cambiarPestaña('solicitar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150">
+        Necesito Donadores
+      </button>
+    </div>
+
+    <form id="formDonador" onsubmit="enviarDatosDonador(event)" class="space-y-4">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
         <input type="text" id="nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
@@ -55,8 +63,51 @@
         <input type="date" id="ultimaDonacion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
       </div>
 
-      <button type="submit" id="btnEnviar" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 cursor-pointer text-center shadow-md">
+      <button type="submit" id="btnEnviarDonador" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 cursor-pointer text-center shadow-md">
         Registrarme como Donador
+      </button>
+    </form>
+
+
+    <form id="formSolicitante" onsubmit="enviarDatosSolicitud(event)" class="space-y-4 hidden">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Familiar o Paciente</label>
+        <input type="text" id="nombreContacto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Sangre Requerida</label>
+          <select id="tipoSangreRequerido" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+            <option value="">Selecciona</option>
+            <option value="O+">O Rh+</option>
+            <option value="O-">O Rh-</option>
+            <option value="A+">A Rh+</option>
+            <option value="A-">A Rh-</option>
+            <option value="B+">B Rh+</option>
+            <option value="B-">B Rh-</option>
+            <option value="AB+">AB Rh+</option>
+            <option value="AB-">AB Rh-</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono de Contacto</label>
+          <input type="tel" id="telefonoContacto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Hospital / Ubicación</label>
+        <input type="text" id="hospital" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Hospital General IMSS N° 71">
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Detalles Adicionales (Cantidad de donadores, motivos)</label>
+        <textarea id="detalles" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Se requieren 4 donadores urgentes de plaquetas..."></textarea>
+      </div>
+
+      <button type="submit" id="btnEnviarSolicitud" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-lg transition duration-200 cursor-pointer text-center shadow-md">
+        Publicar Solicitud Urgente
       </button>
     </form>
 
@@ -64,49 +115,89 @@
 
   </div>
 
-  <script {timestamp}>
-    // ⚠️ PEGA AQUÍ TU ENLACE DE GOOGLE APPS SCRIPT DENTRO DE LAS COMILLAS
-    const URL_API = "https://script.google.com/macros/s/AKfycbzgZHf35eB1n6KTTX2krYYbOcB_N29G_j-rkH9in7BdYN-3Ip0JVA_ngC2_O6mD4icA/exec";
+  <script>
+    const URL_API = "https://script.google.com/macros/s/AKfycbzVNEwe5OrrRqdV6x2S0lAb5GmzmFb6j7i5K8ayiO83QR1rquJkhCLYf9Xl3-yX0lYc/exec";
 
-    function enviarDatos(e) {
+    // Lógica para alternar las pestañas de navegación
+    function cambiarPestaña(pestaña) {
+      const formDonador = document.getElementById('formDonador');
+      const formSolicitante = document.getElementById('formSolicitante');
+      const tabDonar = document.getElementById('tabDonar');
+      const tabSolicitar = document.getElementById('tabSolicitar');
+      document.getElementById('mensajeEstado').classList.add('hidden');
+
+      if (pestaña === 'donar') {
+        formDonador.classList.remove('hidden');
+        formSolicitante.classList.add('hidden');
+        tabDonar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none";
+        tabSolicitar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none";
+      } else {
+        formDonador.classList.add('hidden');
+        formSolicitante.classList.remove('hidden');
+        tabDonar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none";
+        tabSolicitar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-gray-800 text-gray-800 focus:outline-none";
+      }
+    }
+
+    // Enviar datos del Formulario de Donadores
+    function enviarDatosDonador(e) {
       e.preventDefault();
-      
-      const btn = document.getElementById('btnEnviar');
-      const mensajeDiv = document.getElementById('mensajeEstado');
-      
-      btn.disabled = true;
-      btn.innerText = "Procesando...";
-      mensajeDiv.classList.add('hidden');
-
-      const datosFormulario = {
+      const btn = document.getElementById('btnEnviarDonador');
+      const datos = {
+        tipoAccion: "donar",
         nombre: document.getElementById('nombre').value,
         tipoSangre: document.getElementById('tipoSangre').value,
         telefono: document.getElementById('telefono').value,
         ciudad: document.getElementById('ciudad').value,
         ultimaDonacion: document.getElementById('ultimaDonacion').value
       };
+      procesarEnvio(btn, datos, 'formDonador');
+    }
 
-      // Envío de datos nativo usando Fetch API hacia Google Sheets
+    // Enviar datos del Formulario de Solicitudes Urgentes
+    function enviarDatosSolicitud(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnEnviarSolicitud');
+      const datos = {
+        tipoAccion: "solicitar",
+        nombreContacto: document.getElementById('nombreContacto').value,
+        tipoSangreRequerido: document.getElementById('tipoSangreRequerido').value,
+        telefonoContacto: document.getElementById('telefonoContacto').value,
+        hospital: document.getElementById('hospital').value,
+        detalles: document.getElementById('detalles').value
+      };
+      procesarEnvio(btn, datos, 'formSolicitante');
+    }
+
+    // Función genérica Fetch para procesar los datos hacia Google Sheets
+    function procesarEnvio(btn, datos, idFormulario) {
+      const mensajeDiv = document.getElementById('mensajeEstado');
+      const textoOriginal = btn.innerText;
+      
+      btn.disabled = true;
+      btn.innerText = "Procesando...";
+      mensajeDiv.classList.add('hidden');
+
       fetch(URL_API, {
         method: 'POST',
-        mode: 'no-cors', // Evita bloqueos de seguridad del navegador
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datosFormulario)
+        body: JSON.stringify(datos)
       })
       .then(() => {
         btn.disabled = false;
-        btn.innerText = "Registrarme como Donador";
+        btn.innerText = textoOriginal;
         mensajeDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700');
         mensajeDiv.classList.add('bg-green-100', 'text-green-700');
-        mensajeDiv.innerText = "¡Datos enviados con éxito a revisión!";
-        document.getElementById('formDonador').reset();
+        mensajeDiv.innerText = "¡Registro enviado con éxito al sistema!";
+        document.getElementById(idFormulario).reset();
       })
       .catch(err => {
         btn.disabled = false;
-        btn.innerText = "Registrarme como Donador";
+        btn.innerText = textoOriginal;
         mensajeDiv.classList.remove('hidden', 'bg-green-100', 'text-green-700');
         mensajeDiv.classList.add('bg-red-100', 'text-red-700');
-        mensajeDiv.innerText = "Error al conectar: " + err.message;
+        mensajeDiv.innerText = "Error de red: " + err.message;
       });
     }
   </script>
