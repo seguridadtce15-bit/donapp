@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Plataforma Banco de Sangre</title>
+  <!-- TailwindCSS -->
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen flex items-center justify-center p-4">
 
   <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-6 border-t-8 border-red-700">
     
+    <!-- Encabezado -->
     <div class="text-center">
       <h1 class="text-2xl font-bold text-gray-800 flex justify-center items-center gap-2">
         ❤️ Banco de Sangre
@@ -17,15 +19,17 @@
       <p class="text-gray-500 text-sm mt-1">Conectando héroes con vidas que salvar</p>
     </div>
 
+    <!-- Pestañas de Navegación -->
     <div class="flex border-b border-gray-200">
-      <button id="tabDonar" onclick="cambiarPestaña('donar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none transition duration-150">
+      <button id="tabDonar" onclick="cambiarPestaña('donar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none transition duration-150 cursor-pointer">
         Quiero Donar
       </button>
-      <button id="tabSolicitar" onclick="cambiarPestaña('solicitar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150">
+      <button id="tabSolicitar" onclick="cambiarPestaña('solicitar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 cursor-pointer">
         Necesito Donadores
       </button>
     </div>
 
+    <!-- SECCIÓN 1: FORMULARIO PARA REGISTRO DE DONADORES -->
     <form id="formDonador" onsubmit="enviarDatosDonador(event)" class="space-y-4">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
@@ -49,7 +53,7 @@
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono (WhatsApp)</label>
-          <input type="tel" id="telefono" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+          <input type="tel" id="telefono" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: 2293254386">
         </div>
       </div>
 
@@ -69,6 +73,7 @@
     </form>
 
 
+    <!-- SECCIÓN 2: FORMULARIO PARA SOLICITAR DONADORES (Oculto al inicio) -->
     <form id="formSolicitante" onsubmit="enviarDatosSolicitud(event)" class="space-y-4 hidden">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Familiar o Paciente</label>
@@ -102,7 +107,7 @@
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Detalles Adicionales (Cantidad de donadores, motivos)</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Detalles Adicionales (Cantidad, motivos)</label>
         <textarea id="detalles" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Se requieren 4 donadores urgentes de plaquetas..."></textarea>
       </div>
 
@@ -111,14 +116,16 @@
       </button>
     </form>
 
-    <div id="mensajeEstado" class="hidden p-3 rounded-lg text-sm text-center font-medium"></div>
+    <!-- Mensajes de Estado Único Dinámico -->
+    <div id="mensajeEstado" class="hidden p-3 rounded-lg text-sm font-medium"></div>
 
   </div>
 
   <script>
-    const URL_API = "https://script.google.com/macros/s/AKfycbzVNEwe5OrrRqdV6x2S0lAb5GmzmFb6j7i5K8ayiO83QR1rquJkhCLYf9Xl3-yX0lYc/exec";
+    // URL vinculada a tu Google Apps Script de forma directa
+    const URL_API = "https://script.google.com/macros/s/AKfycbxHfQByk0PfcaYjFsf5s7jjF6y1k2bHaBYasuGnKakcc7ChyM74rx3UXWnsIq8OgQ8e/exec";
 
-    // Lógica para alternar las pestañas de navegación
+    // Intercambiar visibilidad entre los formularios
     function cambiarPestaña(pestaña) {
       const formDonador = document.getElementById('formDonador');
       const formSolicitante = document.getElementById('formSolicitante');
@@ -129,17 +136,17 @@
       if (pestaña === 'donar') {
         formDonador.classList.remove('hidden');
         formSolicitante.classList.add('hidden');
-        tabDonar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none";
-        tabSolicitar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none";
+        tabDonar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none cursor-pointer";
+        tabSolicitar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer";
       } else {
         formDonador.classList.add('hidden');
         formSolicitante.classList.remove('hidden');
-        tabDonar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none";
-        tabSolicitar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-gray-800 text-gray-800 focus:outline-none";
+        tabDonar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer";
+        tabSolicitar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-gray-800 text-gray-800 focus:outline-none cursor-pointer";
       }
     }
 
-    // Enviar datos del Formulario de Donadores
+    // Procesar envío del Formulario de Donadores
     function enviarDatosDonador(e) {
       e.preventDefault();
       const btn = document.getElementById('btnEnviarDonador');
@@ -154,7 +161,7 @@
       procesarEnvio(btn, datos, 'formDonador');
     }
 
-    // Enviar datos del Formulario de Solicitudes Urgentes
+    // Procesar envío del Formulario de Solicitudes Urgentes
     function enviarDatosSolicitud(e) {
       e.preventDefault();
       const btn = document.getElementById('btnEnviarSolicitud');
@@ -169,7 +176,7 @@
       procesarEnvio(btn, datos, 'formSolicitante');
     }
 
-    // Función genérica Fetch para procesar los datos hacia Google Sheets
+    // Pipeline unificado para enviar peticiones POST y procesar respuestas JSON
     function procesarEnvio(btn, datos, idFormulario) {
       const mensajeDiv = document.getElementById('mensajeEstado');
       const textoOriginal = btn.innerText;
@@ -180,24 +187,58 @@
 
       fetch(URL_API, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(datos)
       })
-      .then(() => {
+      .then(res => res.json())
+      .then(respuesta => {
         btn.disabled = false;
         btn.innerText = textoOriginal;
-        mensajeDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700');
-        mensajeDiv.classList.add('bg-green-100', 'text-green-700');
-        mensajeDiv.innerText = "¡Registro enviado con éxito al sistema!";
-        document.getElementById(idFormulario).reset();
+        mensajeDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+        
+        if (respuesta.exito) {
+          document.getElementById(idFormulario).reset();
+          
+          if (respuesta.tipo === "donar") {
+            mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-green-100 text-green-700 shadow-sm";
+            mensajeDiv.innerText = "¡Registro exitoso! Gracias por sumarte como donador voluntario.";
+          } 
+          else if (respuesta.tipo === "solicitar") {
+            mensajeDiv.className = "p-4 rounded-lg text-sm bg-blue-50 text-blue-900 border border-blue-200 space-y-3 shadow-inner text-left";
+            
+            let htmlResultado = `<p class="font-bold text-base text-blue-950">🚨 ¡Solicitud publicada con éxito!</p>`;
+            
+            if (respuesta.donadores && respuesta.donadores.length > 0) {
+              htmlResultado += `<p class="text-xs text-gray-700">Hemos localizado <strong>${respuesta.donadores.length} donador(es)</strong> tipo <strong>${respuesta.sangre}</strong> en la base de datos. Presiona un botón para abrir su chat de WhatsApp de inmediato:</p><div class="space-y-2 mt-2">`;
+              
+              respuesta.donadores.forEach(donador => {
+                let textoMensaje = encodeURIComponent(`Hola ${donador.nombre}, disculpa la molestia. Vi en la plataforma que eres donador voluntario tipo ${respuesta.sangre}. Tenemos una situación médica urgente en el ${respuesta.hospital}. ¿Habría alguna posibilidad de que nos apoyes? Muchas gracias.`);
+                let linkWhatsapp = `https://wa.me/${donador.telefono}?text=${textoMensaje}`;
+                
+                htmlResultado += `
+                  <a href="${linkWhatsapp}" target="_blank" class="flex items-center justify-between bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition duration-150 shadow-md decoration-none">
+                    <span>🟢 Contactar a ${donador.nombre}</span>
+                    <span class="bg-green-800 text-white text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap">Enviar mensaje</span>
+                  </a>`;
+              });
+              htmlResultado += `</div>`;
+            } else {
+              htmlResultado += `<p class="text-xs text-gray-600">Por el momento no contamos con donadores registrados que coincidan con el tipo de sangre <strong>${respuesta.sangre}</strong> en el sistema, pero la alerta ha sido almacenada para seguimiento.</p>`;
+            }
+            
+            mensajeDiv.innerHTML = htmlResultado;
+          }
+        } else {
+          mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-red-100 text-red-700";
+          mensajeDiv.innerText = "Error del servidor: " + respuesta.mensaje;
+        }
       })
       .catch(err => {
         btn.disabled = false;
         btn.innerText = textoOriginal;
-        mensajeDiv.classList.remove('hidden', 'bg-green-100', 'text-green-700');
-        mensajeDiv.classList.add('bg-red-100', 'text-red-700');
-        mensajeDiv.innerText = "Error de red: " + err.message;
+        mensajeDiv.classList.remove('hidden');
+        mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-red-100 text-red-700";
+        mensajeDiv.innerText = "Error de conexión. Verifica la conexión a internet o la configuración del script.";
       });
     }
   </script>
