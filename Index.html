@@ -1,15 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro de Donadores</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <style>
-    .bg-blood { background-color: #8b0000; }
-    .text-blood { color: #8b0000; }
-  </style>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen flex items-center justify-center p-4">
 
@@ -69,19 +64,20 @@
 
   </div>
 
-  <script>
+  <script {timestamp}>
+    // ⚠️ PEGA AQUÍ TU ENLACE DE GOOGLE APPS SCRIPT DENTRO DE LAS COMILLAS
+    const URL_API = "https://script.google.com/macros/s/AKfycbzgZHf35eB1n6KTTX2krYYbOcB_N29G_j-rkH9in7BdYN-3Ip0JVA_ngC2_O6mD4icA/exec";
+
     function enviarDatos(e) {
       e.preventDefault();
       
       const btn = document.getElementById('btnEnviar');
       const mensajeDiv = document.getElementById('mensajeEstado');
       
-      // Bloquear botón mientras procesa
       btn.disabled = true;
       btn.innerText = "Procesando...";
       mensajeDiv.classList.add('hidden');
 
-      // Recolectar datos del formulario
       const datosFormulario = {
         nombre: document.getElementById('nombre').value,
         tipoSangre: document.getElementById('tipoSangre').value,
@@ -90,31 +86,28 @@
         ultimaDonacion: document.getElementById('ultimaDonacion').value
       };
 
-      // Llamar a la función del backend de Google Apps Script
-      google.script.run
-        .withSuccessHandler(function(respuesta) {
-          btn.disabled = false;
-          btn.innerText = "Registrarme como Donador";
-          
-          mensajeDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
-          
-          if(respuesta.exito) {
-            mensajeDiv.classList.add('bg-green-100', 'text-green-700');
-            mensajeDiv.innerText = respuesta.mensaje;
-            document.getElementById('formDonador').reset(); // Limpiar formulario
-          } else {
-            mensajeDiv.classList.add('bg-red-100', 'text-red-700');
-            mensajeDiv.innerText = respuesta.mensaje;
-          }
-        })
-        .withFailureHandler(function(err) {
-          btn.disabled = false;
-          btn.innerText = "Registrarme como Donador";
-          mensajeDiv.classList.remove('hidden');
-          mensajeDiv.classList.add('bg-red-100', 'text-red-700');
-          mensajeDiv.innerText = "Error crítico del sistema: " + err.message;
-        })
-        .registrarDonador(datosFormulario);
+      // Envío de datos nativo usando Fetch API hacia Google Sheets
+      fetch(URL_API, {
+        method: 'POST',
+        mode: 'no-cors', // Evita bloqueos de seguridad del navegador
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datosFormulario)
+      })
+      .then(() => {
+        btn.disabled = false;
+        btn.innerText = "Registrarme como Donador";
+        mensajeDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+        mensajeDiv.classList.add('bg-green-100', 'text-green-700');
+        mensajeDiv.innerText = "¡Datos enviados con éxito a revisión!";
+        document.getElementById('formDonador').reset();
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.innerText = "Registrarme como Donador";
+        mensajeDiv.classList.remove('hidden', 'bg-green-100', 'text-green-700');
+        mensajeDiv.classList.add('bg-red-100', 'text-red-700');
+        mensajeDiv.innerText = "Error al conectar: " + err.message;
+      });
     }
   </script>
 </body>
