@@ -2,153 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Donadores de Sangre</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Prueba de Conexión</title>
 </head>
-<body class="bg-slate-900 text-white min-h-screen p-4">
+<body style="font-family: sans-serif; padding: 20px;">
 
-    <div class="max-w-4xl mx-auto space-y-6">
-        <header class="text-center py-4">
-            <h1 class="text-3xl font-extrabold text-red-500">🩸 Red de Donadores Activos</h1>
-            <p class="text-slate-400 text-sm">Registro rápido y gestión de citas sin geolocalización</p>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-fit">
-                <h2 class="text-md font-bold mb-3 text-red-400">🙋‍♂️ 1. Registrarse como Donador</h2>
-                <div class="space-y-3 text-slate-900 text-sm">
-                    <input type="text" id="nombre" placeholder="Nombre Completo" class="w-full p-2 bg-white rounded font-medium">
-                    <input type="tel" id="telefono" placeholder="Número de Teléfono" class="w-full p-2 bg-white rounded font-medium">
-                    <select id="tipoSangre" class="w-full p-2 bg-white rounded font-medium">
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="AB+">AB+</option>
-                    </select>
-                    <button onclick="registrarDonador()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded transition cursor-pointer">
-                        Confirmar mi Registro
-                    </button>
-                </div>
-            </div>
-
-            <div class="md:col-span-2 bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <h2 class="text-md font-bold text-emerald-400">🔍 2. Donadores Disponibles</h2>
-                    <select id="filtroTipo" onchange="actualizarListaDonadores()" class="p-2 bg-slate-700 border border-slate-600 rounded text-sm text-white font-medium">
-                        <option value="TODOS">Mostrar Todos</option>
-                        <option value="O+">Solo O+</option>
-                        <option value="O-">Solo O-</option>
-                        <option value="A+">Solo A+</option>
-                        <option value="A-">Solo A-</option>
-                    </select>
-                </div>
-
-                <div id="listaDonadores" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                    <p class="text-slate-400 text-sm text-center py-4">Cargando lista de donadores...</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="ticket" class="hidden max-w-md mx-auto p-4 bg-emerald-950 text-emerald-300 border border-emerald-500 rounded-md text-center">
-            <p class="font-bold text-lg">✅ ¡Donación Aceptada!</p>
-            <p class="text-xs mt-1">Cita médica programada automáticamente para:</p>
-            <p id="fechaTexto" class="text-md font-mono font-bold mt-1 text-white bg-slate-900 p-2 rounded"></p>
-        </div>
-    </div>
+    <h2>Enviar Dato de Prueba a Excel</h2>
+    <button onclick="enviarDatoPrueba()" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">
+        Enviar "Hola Mundo"
+    </button>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx3XBPbGP6KbusQdiyCctHdX5DZLu3NOFqSL225fOB7IDf-8TfRJxOrlp2n-eNg8TVx/exec";
-        
-        window.onload = actualizarListaDonadores;
+        // REEMPLAZA ESTA URL CON TU URL DE IMPLEMENTACIÓN DE APPS SCRIPT
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwAUn2qZhRO2vxqxvK9akhfJ12yvV0uk2VkXHT486NoXBXF2FW2KcXZTeCzqpTWNLM/exec";
 
-        async function registrarDonador() {
-            const nombre = document.getElementById('nombre').value.trim();
-            const telefono = document.getElementById('telefono').value.trim();
-            const tipoSangre = document.getElementById('tipoSangre').value;
-
-            if(!nombre || !telefono) return alert("Por favor escribe tu nombre y teléfono.");
-
-            const payload = { accion: "registrar", nombre, telefono, tipoSangre };
-
-            try {
-                let res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
-                let data = await res.json();
-                if(data.success) {
-                    alert(`¡Registrado con éxito! Tu ID es: ${data.id}`);
-                    document.getElementById('nombre').value = '';
-                    document.getElementById('telefono').value = '';
-                    actualizarListaDonadores(); 
-                } else {
-                    alert("No se pudo registrar en la base de datos.");
-                }
-            } catch(e) { 
-                alert("Error de registro. Revisa la conexión con el servidor."); 
-            }
-        }
-
-        async function actualizarListaDonadores() {
-            const contenedor = document.getElementById('listaDonadores');
-            const filtro = document.getElementById('filtroTipo').value;
-
-            try {
-                let res = await fetch(WEB_APP_URL);
-                let donadores = await res.json();
-
-                contenedor.innerHTML = "";
-                let contador = 0;
-
-                donadores.forEach(donador => {
-                    if (donador.disponible === true || donador.disponible === "true") {
-                        if (filtro === "TODOS" || donador.tipoSangre === filtro) {
-                            contador++;
-                            
-                            let tarjeta = document.createElement('div');
-                            tarjeta.className = "flex items-center justify-between p-3 bg-slate-700 rounded-lg border border-slate-600 hover:border-slate-500 transition";
-                            tarjeta.innerHTML = `
-                                <div>
-                                    <p class="font-bold text-white text-sm">${donador.nombre} <span class="ml-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full font-mono">🩸 ${donador.tipoSangre}</span></p>
-                                    <p class="text-xs text-slate-400 mt-0.5">ID: ${donador.id} • Tel: ${donador.telefono}</p>
-                                </div>
-                                <button onclick="enviarSolicitud('${donador.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3 rounded transition cursor-pointer">
-                                    Solicitar Cita
-                                </button>
-                            `;
-                            contenedor.appendChild(tarjeta);
-                        }
-                    }
-                });
-
-                if(contador === 0) {
-                    contenedor.innerHTML = `<p class="text-slate-400 text-xs text-center py-4">No hay donadores disponibles con ese tipo de sangre.</p>`;
-                }
-
-            } catch (e) { 
-                contenedor.innerHTML = `<p class="text-red-400 text-xs text-center py-4">Error al conectar con la base de datos.</p>`;
-            }
-        }
-
-        async function enviarSolicitud(donadorId) {
-            if(!confirm(`¿Deseas programar una cita con el donador ID: ${donadorId}?`)) return;
-
+        async function enviarDatoPrueba() {
             try {
                 let res = await fetch(WEB_APP_URL, {
                     method: "POST",
-                    body: JSON.stringify({ accion: "aceptar", donadorId })
+                    body: "Hola Mundo" // Texto plano simple
                 });
                 let data = await res.json();
                 
-                if(data.success) {
-                    document.getElementById('fechaTexto').innerText = new Date(data.fechaCita).toLocaleString();
-                    document.getElementById('ticket').classList.remove('hidden');
-                    actualizarListaDonadores(); 
-                    alert("¡Cita agendada de forma automática!");
+                if (data.success) {
+                    alert("¡Éxito! Dato capturado en el Excel: " + data.guardado);
                 } else {
-                    alert("El donador ya no se encuentra disponible.");
+                    alert("Error en el servidor: " + data.error);
                 }
-            } catch(e) { alert("Error al procesar la cita."); }
+            } catch (e) {
+                alert("Error de conexión. Asegúrate de haber publicado una 'Nueva versión' y que el acceso sea público.");
+            }
         }
     </script>
 </body>
