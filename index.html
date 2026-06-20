@@ -42,6 +42,7 @@
                         <option value="O+">Solo O+</option>
                         <option value="O-">Solo O-</option>
                         <option value="A+">Solo A+</option>
+                        <option value="A-">Solo A-</option>
                     </select>
                 </div>
 
@@ -59,13 +60,10 @@
     </div>
 
     <script>
-        // ⚠️ REEMPLAZA ESTA URL CON TU URL DE ACCESO DE GOOGLE APPS SCRIPT
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxPBcGcMTzoifC6-lfqpf_Pf2n0yjBfdiFHu7RyvH-MtXkcVnt9ccVqZ043rMNcWqGw/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbywpyjyhNQIW438X6fsYvq1JacTNzCFPYNg4qJd5_GR6R_oGnh627NBk-x1cSVhN7-v/exec";
         
-        // Carga los donadores inmediatamente al abrir la página
         window.onload = actualizarListaDonadores;
 
-        // Envía el registro simplificado a Google Sheets
         async function registrarDonador() {
             const nombre = document.getElementById('nombre').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
@@ -91,7 +89,6 @@
             }
         }
 
-        // Descarga los datos de Google Sheets y arma la lista visual
         async function actualizarListaDonadores() {
             const contenedor = document.getElementById('listaDonadores');
             const filtro = document.getElementById('filtroTipo').value;
@@ -133,7 +130,6 @@
             }
         }
 
-        // Solicita la cita
         async function enviarSolicitud(donadorId) {
             if(!confirm(`¿Deseas programar una cita con el donador ID: ${donadorId}?`)) return;
 
