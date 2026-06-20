@@ -1,73 +1,121 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Prueba de Conexión</title>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Donadores</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    .bg-blood { background-color: #8b0000; }
+    .text-blood { color: #8b0000; }
+  </style>
 </head>
-<body style="font-family: sans-serif; padding: 20px;">
+<body class="bg-gray-100 font-sans min-h-screen flex items-center justify-center p-4">
 
-    <h2>Enviar Dato de Prueba a Excel</h2>
-    <button onclick="enviarDatoPrueba()" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">
-        Enviar "Hola Mundo"
-    </button>
+  <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-6 border-t-8 border-red-700">
+    
+    <div class="text-center">
+      <h1 class="text-2xl font-bold text-gray-800 flex justify-center items-center gap-2">
+        ❤️ Banco de Sangre
+      </h1>
+      <p class="text-gray-500 text-sm mt-1">Registra tus datos para salvar vidas</p>
+    </div>
 
-    <script>
-        // REEMPLAZA ESTA URL CON TU URL DE IMPLEMENTACIÓN DE APPS SCRIPT
-        const WEB_APP_URL = "<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Prueba de Conexión</title>
-</head>
-<body style="font-family: sans-serif; padding: 20px; background-color: #f0f2f5;">
+    <form id="formDonador" onsubmit="enviarDatos(event)" class="space-y-4">
+      
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Completo</label>
+        <input type="text" id="nombre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+      </div>
 
-    <h2>Enviar Dato de Prueba a Excel</h2>
-    <button onclick="enviarDatoPrueba()" style="padding: 12px 24px; font-weight: bold; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-        Enviar "Hola Mundo"
-    </button>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Sangre</label>
+          <select id="tipoSangre" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+            <option value="">Selecciona</option>
+            <option value="O+">O Rh+</option>
+            <option value="O-">O Rh-</option>
+            <option value="A+">A Rh+</option>
+            <option value="A-">A Rh-</option>
+            <option value="B+">B Rh+</option>
+            <option value="B-">B Rh-</option>
+            <option value="AB+">AB Rh+</option>
+            <option value="AB-">AB Rh-</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono (WhatsApp)</label>
+          <input type="tel" id="telefono" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+        </div>
+      </div>
 
-    <script>
-        // COLOCA AQUÍ TU NUEVA URL DE IMPLEMENTACIÓN DE APPS SCRIPT
-        const WEB_APP_URL = "TU_URL_DE_APPS_SCRIPT_AQUÍ";
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad o Zona</label>
+        <input type="text" id="ciudad" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Veracruz Centro">
+      </div>
 
-        async function enviarDatoPrueba() {
-            try {
-                let res = await fetch(WEB_APP_URL, {
-                    method: "POST",
-                    body: "Hola Mundo"
-                });
-                let data = await res.json();
-                
-                if (data.success) {
-                    alert("¡Éxito! Capturado en el Excel: " + data.guardado);
-                } else {
-                    alert("Error en el servidor: " + data.error);
-                }
-            } catch (e) {
-                alert("Error de conexión. Asegúrate de publicar una 'Nueva versión' con acceso para 'Cualquier usuario'.");
-            }
-        }
-    </script>
-</body>
-</html>";
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">¿Cuándo fue tu última donación? (Opcional)</label>
+        <input type="date" id="ultimaDonacion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+      </div>
 
-        async function enviarDatoPrueba() {
-            try {
-                let res = await fetch(WEB_APP_URL, {
-                    method: "POST",
-                    body: "Hola Mundo" // Texto plano simple
-                });
-                let data = await res.json();
-                
-                if (data.success) {
-                    alert("¡Éxito! Dato capturado en el Excel: " + data.guardado);
-                } else {
-                    alert("Error en el servidor: " + data.error);
-                }
-            } catch (e) {
-                alert("Error de conexión. Asegúrate de haber publicado una 'Nueva versión' y que el acceso sea público.");
-            }
-        }
-    </script>
+      <button type="submit" id="btnEnviar" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 cursor-pointer text-center shadow-md">
+        Registrarme como Donador
+      </button>
+    </form>
+
+    <div id="mensajeEstado" class="hidden p-3 rounded-lg text-sm text-center font-medium"></div>
+
+  </div>
+
+  <script>
+    function enviarDatos(e) {
+      e.preventDefault();
+      
+      const btn = document.getElementById('btnEnviar');
+      const mensajeDiv = document.getElementById('mensajeEstado');
+      
+      // Bloquear botón mientras procesa
+      btn.disabled = true;
+      btn.innerText = "Procesando...";
+      mensajeDiv.classList.add('hidden');
+
+      // Recolectar datos del formulario
+      const datosFormulario = {
+        nombre: document.getElementById('nombre').value,
+        tipoSangre: document.getElementById('tipoSangre').value,
+        telefono: document.getElementById('telefono').value,
+        ciudad: document.getElementById('ciudad').value,
+        ultimaDonacion: document.getElementById('ultimaDonacion').value
+      };
+
+      // Llamar a la función del backend de Google Apps Script
+      google.script.run
+        .withSuccessHandler(function(respuesta) {
+          btn.disabled = false;
+          btn.innerText = "Registrarme como Donador";
+          
+          mensajeDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+          
+          if(respuesta.exito) {
+            mensajeDiv.classList.add('bg-green-100', 'text-green-700');
+            mensajeDiv.innerText = respuesta.mensaje;
+            document.getElementById('formDonador').reset(); // Limpiar formulario
+          } else {
+            mensajeDiv.classList.add('bg-red-100', 'text-red-700');
+            mensajeDiv.innerText = respuesta.mensaje;
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.innerText = "Registrarme como Donador";
+          mensajeDiv.classList.remove('hidden');
+          mensajeDiv.classList.add('bg-red-100', 'text-red-700');
+          mensajeDiv.innerText = "Error crítico del sistema: " + err.message;
+        })
+        .registrarDonador(datosFormulario);
+    }
+  </script>
 </body>
 </html>
