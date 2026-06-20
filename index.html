@@ -10,6 +10,7 @@
 
   <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-6 border-t-8 border-red-700">
     
+    <!-- Encabezado -->
     <div class="text-center">
       <h1 class="text-2xl font-bold text-gray-800 flex justify-center items-center gap-2">
         ❤️ Banco de Sangre
@@ -17,6 +18,7 @@
       <p class="text-gray-500 text-sm mt-1">Conectando héroes con vidas que salvar</p>
     </div>
 
+    <!-- Pestañas de Navegación -->
     <div class="flex border-b border-gray-200">
       <button id="tabDonar" onclick="cambiarPestaña('donar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none transition duration-150 cursor-pointer">
         Quiero Donar
@@ -24,6 +26,21 @@
       <button id="tabSolicitar" onclick="cambiarPestaña('solicitar')" class="w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 cursor-pointer">
         Necesito Donadores
       </button>
+    </div>
+
+    <!-- SECCIÓN DE CONTADORES DE DONADORES (AZUL BRILLANTE) -->
+    <div id="contenedorContadores" class="bg-blue-50 border border-blue-100 rounded-xl p-3">
+      <p class="text-xs font-bold text-blue-900 mb-2 text-center flex justify-center items-center gap-1">📊 Donadores Voluntarios Registrados</p>
+      <div class="grid grid-cols-4 gap-2 text-center text-xs font-bold">
+        <div class="bg-white p-1.5 rounded-lg border border-blue-200">O+ <span id="cnt-O+" class="block text-blue-600 text-sm font-extrabold mt-0.5">0</span></div>
+        <div class="bg-white p-1.5 rounded-lg border border-blue-200">O- <span id="cnt-O-" class="block text-blue-600 text-sm font-extrabold mt-0.5">0</span></div>
+        <div class="bg-white p-1.5 rounded-lg border border-blue-200">A+ <span id="cnt-A+" class="block text-blue-600 text-sm font-extrabold mt-0.5">0</span></div>
+        <div class="bg-white p-1.5 rounded-lg border border-blue-200">A- <span id="cnt-A-" class="block text-blue-600 text-sm font-extrabold mt-0.5">0</span></div>
+        <div class="bg-white p-1.5 rounded-lg border border-blue-200">B+ <span id="cnt-B+" class="block text-blue-600 text-sm font-extrabold mt-0.5">0</span></div>
+        <div class="bg-white p-1.5 rounded-lg border border-blue-200">B- <span id="cnt-B-" class="block text-blue-600 text-sm font-extrabold mt-0.5">0</span></div>
+        <div class="bg-white p-1.5 rounded-lg border border-blue-200">AB+<span id="cnt-AB+" class="block text-blue-600 text-sm font-extrabold mt-0.5">0</span></div>
+        <div class="bg-white p-1.5 rounded-lg border border-blue-200">AB-<span id="cnt-AB-" class="block text-blue-600 text-sm font-extrabold mt-0.5">0</span></div>
+      </div>
     </div>
 
     <!-- FORMULARIO DONADORES -->
@@ -123,24 +140,33 @@
 
     <div id="mensajeEstado" class="hidden p-3 rounded-lg text-sm font-medium"></div>
 
+    <!-- SECCIÓN: HISTORIAL DE CASOS ACTIVOS -->
+    <div id="seccionHistorial" class="border-t border-gray-200 pt-4 hidden">
+      <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-1.5">🚨 Casos Urgentes Activos</h3>
+      <div id="listaCasos" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+        <p class="text-xs text-gray-400 text-center py-2">No hay solicitudes urgentes activas en este momento.</p>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    const URL_API = "https://script.google.com/macros/s/AKfycbyYhpRtGC6tmijWhh0xnjVSRTrz_UbCwuIJ-cHdowmC2f5OIZubhmmiXMIz3457ae2m/exec";
+    const URL_API = "https://script.google.com/macros/s/AKfycbwc359Sc1gR0R0bfDUY7bkyId9AYqz5E5d4CppBWEulbl2LKo7PZ5XXek_zvDB6E2gb/exec";
     let baseDatosUbicaciones = {};
 
     document.addEventListener("DOMContentLoaded", () => {
       const hoy = new Date().toISOString().split("T")[0];
       document.getElementById("ultimaDonacion").setAttribute("max", hoy);
-      descargarMapaHospitales();
+      cargarDatosIniciales();
     });
 
-    function descargarMapaHospitales() {
+    function cargarDatosIniciales() {
       const selectCiudad = document.getElementById("ciudadUrgencia");
       fetch(URL_API)
         .then(res => res.json())
         .then(data => {
-          if (data.exito && data.mapa) {
+          if (data.exito) {
+            // 1. Cargar ciudades y mapas cascada
             baseDatosUbicaciones = data.mapa;
             selectCiudad.innerHTML = '<option value="">Selecciona la Ciudad</option>';
             Object.keys(baseDatosUbicaciones).forEach(ciudad => {
@@ -149,25 +175,79 @@
               opt.textContent = ciudad;
               selectCiudad.appendChild(opt);
             });
-          } else {
-            selectCiudad.innerHTML = '<option value="">Error al indexar ubicaciones</option>';
+
+            // 2. Cargar contadores numéricos en azul brillante
+            if (data.contadores) {
+              Object.keys(data.contadores).forEach(sangre => {
+                const el = document.getElementById(`cnt-${sangre}`);
+                if (el) el.textContent = data.contadores[sangre];
+              });
+            }
+
+            // 3. Cargar Historial de Casos Activos
+            renderizarHistorial(data.solicitudes);
           }
         })
         .catch(() => {
-          selectCiudad.innerHTML = '<option value="">Error al conectar con la base de datos</option>';
+          selectCiudad.innerHTML = '<option value="">Error al sincronizar datos</option>';
         });
+    }
+
+    function renderizarHistorial(solicitudes) {
+      const contenedor = document.getElementById("listaCasos");
+      if (!solicitudes || solicitudes.length === 0) {
+        contenedor.innerHTML = '<p class="text-xs text-gray-400 text-center py-2">No hay solicitudes urgentes activas.</p>';
+        return;
+      }
+
+      contenedor.innerHTML = "";
+      solicitudes.forEach(sol => {
+        const div = document.createElement("div");
+        div.className = "bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs space-y-2 relative";
+        div.innerHTML = `
+          <div><strong>Paciente:</strong> ${sol.paciente}</div>
+          <div class="grid grid-cols-2 gap-1">
+            <div><strong>Tipo:</strong> <span class="text-red-600 font-bold">${sol.sangre}</span></div>
+            <div><strong>Hospital:</strong> ${sol.hospital}</div>
+          </div>
+          ${sol.detalles ? `<div class="text-gray-500 italic">"${sol.detalles}"</div>` : ''}
+          <button onclick="marcarComoAtendida(${sol.idFila}, this)" class="w-full bg-white border border-green-600 text-green-700 hover:bg-green-50 font-bold py-1.5 px-2 rounded-lg transition duration-150 cursor-pointer text-center text-[11px] mt-1 shadow-sm">
+            ✅ ¡Donadores Conseguidos!
+          </button>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    function marcarComoAtendida(idFila, boton) {
+      boton.disabled = true;
+      boton.innerText = "Actualizando caso...";
+      
+      fetch(URL_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ tipoAccion: "resolver", idFila: idFila })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.exito) {
+          cargarDatosIniciales(); // Recargar todo para actualizar contadores e historial
+        }
+      })
+      .catch(() => {
+        boton.disabled = false;
+        boton.innerText = "❌ Error, reintentar";
+      });
     }
 
     function filtrarHospitalesPorCiudad() {
       const ciudadSeleccionada = document.getElementById("ciudadUrgencia").value;
       const selectHospital = document.getElementById("hospital");
-      
       selectHospital.innerHTML = '<option value="">Selecciona el Hospital</option>';
       
       if (ciudadSeleccionada && baseDatosUbicaciones[ciudadSeleccionada]) {
         selectHospital.disabled = false;
         selectHospital.className = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white cursor-pointer";
-        
         baseDatosUbicaciones[ciudadSeleccionada].forEach(hosp => {
           const opt = document.createElement("option");
           opt.value = hosp;
@@ -186,16 +266,22 @@
       const formSolicitante = document.getElementById('formSolicitante');
       const tabDonar = document.getElementById('tabDonar');
       const tabSolicitar = document.getElementById('tabSolicitar');
+      const contadores = document.getElementById('contenedorContadores');
+      const historial = document.getElementById('seccionHistorial');
       document.getElementById('mensajeEstado').classList.add('hidden');
 
       if (pestaña === 'donar') {
         formDonador.classList.remove('hidden');
         formSolicitante.classList.add('hidden');
+        contadores.classList.remove('hidden');
+        historial.classList.add('hidden');
         tabDonar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-red-600 text-red-600 focus:outline-none cursor-pointer";
         tabSolicitar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer";
       } else {
         formDonador.classList.add('hidden');
         formSolicitante.classList.remove('hidden');
+        contadores.classList.add('hidden');
+        historial.classList.remove('hidden');
         tabDonar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer";
         tabSolicitar.className = "w-1/2 py-2 text-center font-semibold text-sm border-b-2 border-gray-800 text-gray-800 focus:outline-none cursor-pointer";
       }
@@ -255,17 +341,18 @@
              document.getElementById("hospital").className = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 cursor-not-allowed";
           }
           
+          cargarDatosIniciales(); // Recargar contadores e historial en vivo
+
           if (respuesta.tipo === "donar") {
             mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-green-100 text-green-700 shadow-sm";
             mensajeDiv.innerText = "¡Registro exitoso! Gracias por sumarte como donador voluntario.";
           } 
           else if (respuesta.tipo === "solicitar") {
             mensajeDiv.className = "p-4 rounded-lg text-sm bg-blue-50 text-blue-900 border border-blue-200 space-y-3 shadow-inner text-left";
-            
             let htmlResultado = `<p class="font-bold text-base text-blue-950">🚨 ¡Solicitud publicada con éxito!</p>`;
             
             if (respuesta.donadores && respuesta.donadores.length > 0) {
-              htmlResultado += `<p class="text-xs text-gray-700">Hemos localizado <strong>${respuesta.donadores.length} donador(es)</strong> compatibles. Los ubicados en <strong>${datos.ciudad}</strong> aparecen primero para acelerar el contacto:</p><div class="space-y-2 mt-2">`;
+              htmlResultado += `<p class="text-xs text-gray-700">Hemos localizado <strong>${respuesta.donadores.length} donador(es)</strong> compatibles. Los ubicados en <strong>${datos.ciudad}</strong> aparecen primero:</p><div class="space-y-2 mt-2">`;
               
               respuesta.donadores.forEach(donador => {
                 let textoMensaje = encodeURIComponent(`Hola ${donador.nombre}, disculpa la molestia. Vi en la plataforma que eres donador voluntario tipo ${respuesta.sangre}. Tenemos una situación médica urgente en el hospital ${respuesta.hospital} de ${datos.ciudad}. ¿Habría alguna posibilidad de que nos apoyes? Muchas gracias.`);
@@ -294,7 +381,7 @@
         btn.disabled = false;
         btn.innerText = textoOriginal;
         mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-red-100 text-red-700";
-        mensajeDiv.innerText = "Error de conexión. Verifica la configuración o la red.";
+        mensajeDiv.innerText = "Error de conexión. Verifica la configuración.";
         mensajeDiv.classList.remove('hidden');
       });
     }
