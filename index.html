@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Donadores en Mapa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #mapa { height: 400px; width: 100%; border-radius: 12px; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen p-4">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        <header class="text-center py-2">
+            <h1 class="text-3xl font-extrabold text-red-500">🩸 Mapa de Donadores Activos</h1>
+            <p class="text-slate-400 text-sm">Encuentra compatibilidades visualmente en tu zona</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-fit">
+                <h2 class="text-md font-bold mb-3 text-red-400">🙋‍♂️ 1. Registrarse como Donador</h2>
+                <div class="space-y-3 text-slate-900 text-sm">
+                    <input type="text" id="nombre" placeholder="Nombre" class="w-full p-2 bg-white rounded">
+                    <input type="tel" id="telefono" placeholder="Teléfono" class="w-full p-2 bg-white rounded">
+                    <select id="tipoSangre" class="w-full p-2 bg-white rounded">
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="A+">A+</option>
+                    </select>
+                    <button onclick="registrarDonador()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded transition">
+                        Registrar mi posición GPS
+                    </button>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <h2 class="text-md font-bold text-emerald-400">🔍 2. Buscar por Tipo de Sangre</h2>
+                    <select id="filtroTipo" onchange="cargarDonadoresEnMapa()" class="p-2 bg-slate-700 border border-slate-600 rounded text-sm text-white">
+                        <option value="TODOS">Mostrar Todos</option>
+                        <option value="O+">Solo O+</option>
+                        <option value="O-">Solo O-</option>
+                        <option value="A+">Solo A+</option>
+                    </select>
+                </div>
+
+                <div id="mapa" class="bg-slate-700 border border-slate-600 shadow-inner"></div>
+            </div>
+        </div>
+
+        <div id="ticket" class="hidden max-w-md mx-auto p-4 bg-emerald-950 text-emerald-300 border border-emerald-500 rounded-md text-center">
+            <p class="font-bold text-lg">✅ ¡Donación Aceptada!</p>
+            <p class="text-xs mt-1">Cita médica programada automáticamente para:</p>
+            <p id="fechaTexto" class="text-md font-mono font-bold mt-1 text-white bg-slate-900 p-2 rounded"></p>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ REEMPLAZA CON TU URL DE GOOGLE APPS SCRIPT
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLQ-kpwkIx1iBOLTR1ddkxVZ7NJCYMTLCfEBcKYAOIa1tbhkEtAIXEOtnDHRic_Cal/exec";
+        
+        let mapa;
+        let capasMarcadores = [];
+
+        // Inicializar el mapa centrado por defecto
+        function initMapa(lat, lng) {
+            mapa = L.map('mapa').setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(mapa);
+        }
+
+        // Obtener ubicación inicial para centrar el mapa del usuario
+        navigator.geolocation.getCurrentPosition((pos) => {
+            initMapa(pos.coords.latitude, pos.coords.longitude);
+            cargarDonadoresEnMapa();
+        }, () => {
+            initMapa(19.4326, -99.1332); // Centro de CDMX por defecto si el GPS falla
+            cargarDonadoresEnMapa();
+        });
+
+        // REGISTRAR NUEVO DONADOR VÍA GPS
+        function registrarDonador() {
+            const nombre = document.getElementById('nombre').value;
+            const telefono = document.getElementById('telefono').value;
+            const tipoSangre = document.getElementById('tipoSangre').value;
+
+            if(!nombre || !telefono) return alert("Por favor escribe tu nombre y teléfono.");
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const payload = {
+                    accion: "registrar", nombre, telefono, tipoSangre,
+                    lat: pos.coords.latitude, lng: pos.coords.longitude
+                };
+
+                try {
+                    let res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+                    let data = await res.json();
+                    if(data.success) {
+                        alert(`¡Te has registrado con éxito! Tu ID es: ${data.id}`);
+                        mapa.setView([pos.coords.latitude, pos.coords.longitude], 14);
+                        cargarDonadoresEnMapa(); // Recargar mapa
+                    }
+                } catch(e) { alert("Error de registro."); }
+            });
+        }
+
+        // TRAER DATOS DE EXCEL Y DIBUJAR PINES FILTRADOS
+        async function cargarDonadoresEnMapa() {
+            if (!mapa) return;
+
+            // Limpiar marcadores anteriores
+            capasMarcadores.forEach(m => mapa.removeLayer(m));
+            capasMarcadores = [];
+
+            const filtro = document.getElementById('filtroTipo').value;
+
+            try {
+                let res = await fetch(WEB_APP_URL);
+                let donadores = await res.json();
+
+                donadores.forEach(donador => {
+                    // Filtrar por tipo y disponibilidad
+                    if (donador.disponible === true || donador.disponible === "true") {
+                        if (filtro === "TODOS" || donador.tipoSangre === filtro) {
+                            
+                            // Crear el pin en el mapa
+                            let marcador = L.marker([donador.lat, donador.lng]).addTo(mapa);
+                            
+                            // Crear la ventana de información (Popup) con el botón de solicitar
+                            let htmlPopup = `
+                                <div class="text-slate-900 p-1">
+                                    <p class="font-bold text-red-600">🩸 Donador ${donador.tipoSangre}</p>
+                                    <p class="text-xs"><b>Nombre:</b> ${donador.nombre}</p>
+                                    <button onclick="enviarSolicitud('${donador.id}')" class="mt-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-2 rounded block w-full text-center">
+                                        📲 Enviar Solicitud de Cita
+                                    </button>
+                                </div>
+                            `;
+                            
+                            marcador.bindPopup(htmlPopup);
+                            capasMarcadores.push(marcador);
+                        }
+                    }
+                });
+            } catch (e) { console.error("Error cargando el mapa: ", e); }
+        }
+
+        // ENVIAR SOLICITUD Y SIMULAR ACEPTACIÓN DEL DONADOR
+        async function enviarSolicitud(donadorId) {
+            if(!confirm(`¿Deseas enviar la alerta en tiempo real al donador con ID: ${donadorId}?`)) return;
+
+            try {
+                let res = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ accion: "aceptar", donadorId })
+                });
+                let data = await res.json();
+                
+                if(data.success) {
+                    mapa.closePopup();
+                    document.getElementById('fechaTexto').innerText = new Date(data.fechaCita).toLocaleString();
+                    document.getElementById('ticket').classList.remove('hidden');
+                    cargarDonadoresEnMapa(); // Refrescar el mapa para quitar al donador asignado
+                    alert("¡El donador aceptó la alerta! Cita agendada de forma automática.");
+                } else {
+                    alert("El donador ya no se encuentra disponible.");
+                }
+            } catch(e) { alert("Error al procesar la cita."); }
+        }
+    </script>
+</body>
+</html>
