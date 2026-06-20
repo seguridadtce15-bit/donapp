@@ -71,9 +71,12 @@
         </div>
       </div>
 
+      <!-- NUEVO MENÚ DESPLEGABLE PARA CIUDAD DEL DONADOR -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad o Zona donde resides</label>
-        <input type="text" id="ciudad" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ej: Veracruz Centro">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Ciudad donde resides</label>
+        <select id="ciudadDonador" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+          <option value="">Cargando ciudades...</option>
+        </select>
       </div>
 
       <div>
@@ -151,7 +154,7 @@
   </div>
 
   <script>
-    const URL_API = "https://script.google.com/macros/s/AKfycbwc359Sc1gR0R0bfDUY7bkyId9AYqz5E5d4CppBWEulbl2LKo7PZ5XXek_zvDB6E2gb/exec";
+    const URL_API = "https://script.google.com/macros/s/AKfycbyBP3M0AuiZxmu_AAxAgK1qmns39bXElJBEsXk9525egqSd3CcDPuehT04F2tD05oYd/exec";
     let baseDatosUbicaciones = {};
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -161,22 +164,34 @@
     });
 
     function cargarDatosIniciales() {
-      const selectCiudad = document.getElementById("ciudadUrgencia");
+      const selectCiudadUrgencia = document.getElementById("ciudadUrgencia");
+      const selectCiudadDonador = document.getElementById("ciudadDonador");
+      
       fetch(URL_API)
         .then(res => res.json())
         .then(data => {
           if (data.exito) {
-            // 1. Cargar ciudades y mapas cascada
             baseDatosUbicaciones = data.mapa;
-            selectCiudad.innerHTML = '<option value="">Selecciona la Ciudad</option>';
+            
+            // Limpiar y llenar ambos menús desplegables con las mismas ciudades precargadas
+            selectCiudadUrgencia.innerHTML = '<option value="">Selecciona la Ciudad</option>';
+            selectCiudadDonador.innerHTML = '<option value="">Selecciona tu Ciudad</option>';
+            
             Object.keys(baseDatosUbicaciones).forEach(ciudad => {
-              const opt = document.createElement("option");
-              opt.value = ciudad;
-              opt.textContent = ciudad;
-              selectCiudad.appendChild(opt);
+              // Opción para formulario de solicitudes
+              const optUrgencia = document.createElement("option");
+              optUrgencia.value = city = ciudad;
+              optUrgencia.textContent = ciudad;
+              selectCiudadUrgencia.appendChild(optUrgencia);
+              
+              // Opción para formulario de donadores
+              const optDonador = document.createElement("option");
+              optDonador.value = ciudad;
+              optDonador.textContent = ciudad;
+              selectCiudadDonador.appendChild(optDonador);
             });
 
-            // 2. Cargar contadores numéricos en azul brillante
+            // Cargar contadores numéricos en azul brillante
             if (data.contadores) {
               Object.keys(data.contadores).forEach(sangre => {
                 const el = document.getElementById(`cnt-${sangre}`);
@@ -184,12 +199,13 @@
               });
             }
 
-            // 3. Cargar Historial de Casos Activos
+            // Cargar Historial de Casos Activos
             renderizarHistorial(data.solicitudes);
           }
         })
         .catch(() => {
-          selectCiudad.innerHTML = '<option value="">Error al sincronizar datos</option>';
+          selectCiudadUrgencia.innerHTML = '<option value="">Error al sincronizar</option>';
+          selectCiudadDonador.innerHTML = '<option value="">Error al sincronizar</option>';
         });
     }
 
@@ -231,7 +247,7 @@
       .then(res => res.json())
       .then(res => {
         if (res.exito) {
-          cargarDatosIniciales(); // Recargar todo para actualizar contadores e historial
+          cargarDatosIniciales();
         }
       })
       .catch(() => {
@@ -295,7 +311,7 @@
         nombre: document.getElementById('nombre').value,
         tipoSangre: document.getElementById('tipoSangre').value,
         telefono: document.getElementById('telefono').value,
-        ciudad: document.getElementById('ciudad').value,
+        ciudad: document.getElementById('ciudadDonador').value, // Envía el valor seleccionado del menú desplegable
         ultimaDonacion: document.getElementById('ultimaDonacion').value
       };
       procesarEnvio(btn, datos, 'formDonador');
@@ -341,7 +357,7 @@
              document.getElementById("hospital").className = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 cursor-not-allowed";
           }
           
-          cargarDatosIniciales(); // Recargar contadores e historial en vivo
+          cargarDatosIniciales(); // Recargar la info para actualizar los contadores al momento
 
           if (respuesta.tipo === "donar") {
             mensajeDiv.className = "p-3 rounded-lg text-sm text-center font-medium bg-green-100 text-green-700 shadow-sm";
