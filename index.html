@@ -13,7 +13,43 @@
 
     <script>
         // REEMPLAZA ESTA URL CON TU URL DE IMPLEMENTACIÓN DE APPS SCRIPT
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzAPCWtN6bMs8QZZ8Ih1hxloy15dUVHwgEnG5teDghzL3iyAVZ6R7vp8g-zFvqvXID3/exec";
+        const WEB_APP_URL = "<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prueba de Conexión</title>
+</head>
+<body style="font-family: sans-serif; padding: 20px; background-color: #f0f2f5;">
+
+    <h2>Enviar Dato de Prueba a Excel</h2>
+    <button onclick="enviarDatoPrueba()" style="padding: 12px 24px; font-weight: bold; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Enviar "Hola Mundo"
+    </button>
+
+    <script>
+        // COLOCA AQUÍ TU NUEVA URL DE IMPLEMENTACIÓN DE APPS SCRIPT
+        const WEB_APP_URL = "TU_URL_DE_APPS_SCRIPT_AQUÍ";
+
+        async function enviarDatoPrueba() {
+            try {
+                let res = await fetch(WEB_APP_URL, {
+                    method: "POST",
+                    body: "Hola Mundo"
+                });
+                let data = await res.json();
+                
+                if (data.success) {
+                    alert("¡Éxito! Capturado en el Excel: " + data.guardado);
+                } else {
+                    alert("Error en el servidor: " + data.error);
+                }
+            } catch (e) {
+                alert("Error de conexión. Asegúrate de publicar una 'Nueva versión' con acceso para 'Cualquier usuario'.");
+            }
+        }
+    </script>
+</body>
+</html>";
 
         async function enviarDatoPrueba() {
             try {
